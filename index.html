@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="vector.js"></script>
+        <script type="text/javascript" src="matrix4x4.js"></script>
+        <script type="text/javascript">
+            var width = 200;
+            var height = 200;
+            var origX = width / 2;
+            var origY = height / 2;
+            var canvas, context;
+            var prevTime = 0;
+            var up = false;
+            var down = false;
+            var left = false;
+            var right = false;
+            var rotateLeft = false;
+            var rotateRight = false;
+            var forward = false;
+            var backward = false;
+            var speed = 20;
+            var cameraRotation = Math.PI / 4;
+            var matrix4x4 = new Matrix4x4();
+            
+            var cameraVector = new Vector(0, 0, 0);
+            var cameraViewDir = new Vector(0, 0, 1);
+            
+            window.onload = function() {
+                canvas = document.getElementById("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                context = canvas.getContext("2d");
+                document.onkeydown = onKeyDown;
+                document.onkeyup = onKeyUp;
+                requestAnimationFrame(update);
+            };
+            
+            function update(time) {
+                var dt = (time - prevTime) / 1000;
+                prevTime = time;
+                
+                context.clearRect(0, 0, width, height);
+                
+                // Camera manipulation
+                if (left) {
+                    cameraVector.x -= speed * dt;
+                }
+                if (right) {
+                    cameraVector.x += speed * dt;
+                }
+                if (up) {
+                    cameraVector.y += speed * dt;
+                }
+                if (down) {
+                    cameraVector.y -= speed * dt;
+                }
+                if (forward) {
+                    var scaledVector = cameraViewDir.mul(speed);
+                    cameraVector.addThis(scaledVector.mul(dt));
+                }
+                if (backward) {
+                    var scaledVector = cameraViewDir.mul(-speed);
+                    cameraVector.addThis(scaledVector.mul(dt));
+                }
+                if (rotateLeft) {
+                    var matrix = matrix4x4.getYRotationM4x4(cameraRotation * dt);
+                    cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
+                }
+                if (rotateRight) {
+                    var matrix = matrix4x4.getYRotationM4x4(-cameraRotation * dt);
+                    cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
+                }
+                
+                var camTo = matrix4x4.get2DProjectionVector(cameraVector.add(cameraViewDir.mul(20)));
+                var camFrom = matrix4x4.get2DProjectionVector(cameraVector);
+                context.beginPath();
+                context.strokeStyle = "#ccc";
+                context.moveTo(origX + camFrom.x, origY - camFrom.y);
+                context.lineTo(origX + camTo.x, origY - camTo.y);
+                context.stroke();
+                
+                var tmp = new Vector(0, 1, 0);
+                var xAxis = tmp.cross(cameraViewDir);
+                var camXTo = matrix4x4.get2DProjectionVector(cameraVector.add(xAxis.mul(20)));
+                context.beginPath();
+                context.strokeStyle = "#00ff00";
+                context.moveTo(origX + camFrom.x, origY - camFrom.y);
+                context.lineTo(origX + camXTo.x, origY - camXTo.y);
+                context.stroke();
+                
+                var yAxis = cameraViewDir.cross(xAxis);
+                var camYTo = matrix4x4.get2DProjectionVector(cameraVector.add(yAxis.mul(20)));
+                context.beginPath();
+                context.strokeStyle = "#0000ff";
+                context.moveTo(origX + camFrom.x, origY - camFrom.y);
+                context.lineTo(origX + camYTo.x, origY - camYTo.y);
+                context.stroke();
+                
+                requestAnimationFrame(update);
+            }
+            
+            function onKeyDown(evt) {
+                if (evt.keyCode === 87) up = true;
+                if (evt.keyCode === 65) left = true;
+                if (evt.keyCode === 68) right = true;
+                if (evt.keyCode === 83) down = true;
+                if (evt.keyCode === 37) rotateLeft = true;
+                if (evt.keyCode === 39) rotateRight = true;
+                if (evt.keyCode === 38) forward = true;
+                if (evt.keyCode === 40) backward = true;
+            }
+            
+            function onKeyUp(evt) {
+                if (evt.keyCode === 87) up = false;
+                if (evt.keyCode === 65) left = false;
+                if (evt.keyCode === 68) right = false;
+                if (evt.keyCode === 83) down = false;
+                if (evt.keyCode === 37) rotateLeft = false;
+                if (evt.keyCode === 39) rotateRight = false;
+                if (evt.keyCode === 38) forward = false;
+                if (evt.keyCode === 40) backward = false;
+            }
+        </script>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+    </body>
+</html>
