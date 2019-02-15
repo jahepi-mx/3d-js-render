@@ -29,10 +29,14 @@ and open the template in the editor.
             var rotateRight = false;
             var forward = false;
             var backward = false;
+            var pitchUp = false;
+            var pitchDown = false;
             var speed = 20;
             var cameraRotation = Math.PI / 4;
             var matrix4x4 = Matrix4x4.getInstance();
             var mesh = null;
+            var transpose = false;
+            var pitch = 0;
             
             var cameraVector = new Vector(0, 0, 0);
             var cameraViewDir = new Vector(0, 0, 1);
@@ -55,8 +59,7 @@ and open the template in the editor.
                         input.value = "";
                     };
                     reader.readAsText(file);
-                });
-                
+                });                
                 requestAnimationFrame(update);
             };
             
@@ -96,25 +99,37 @@ and open the template in the editor.
                     cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
                 }
                 
-                var camTo = matrix4x4.get2DProjectionVector(cameraVector.add(cameraViewDir.mul(20)));
+                var zAxis = cameraViewDir.clone();
+                var tmp = new Vector(0, 1, 0);
+                var xAxis = tmp.cross(cameraViewDir);          
+                var yAxis = cameraViewDir.cross(xAxis);
+                
+                if (transpose) {
+                    var tm = matrix4x4.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
+                    tm = matrix4x4.transposeM4x4(tm);
+                    var tmpX = xAxis.clone();
+                    xAxis = new Vector(tm[0], tm[4], tm[8]);
+                    //console.log(Math.acos(tmpX.dot(xAxis)) * 180 / Math.PI);
+                    yAxis = new Vector(tm[1], tm[5], tm[9]);
+                    zAxis = new Vector(tm[2], tm[6], tm[10]);
+                }
                 var camFrom = matrix4x4.get2DProjectionVector(cameraVector);
+                var camZTo = matrix4x4.get2DProjectionVector(cameraVector.add(zAxis.mul(20)));
+                var camXTo = matrix4x4.get2DProjectionVector(cameraVector.add(xAxis.mul(20)));
+                var camYTo = matrix4x4.get2DProjectionVector(cameraVector.add(yAxis.mul(20)));
+                    
                 context.beginPath();
                 context.strokeStyle = "#ccc";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
-                context.lineTo(origX + camTo.x, origY - camTo.y);
+                context.lineTo(origX + camZTo.x, origY - camZTo.y);
                 context.stroke();
                 
-                var tmp = new Vector(0, 1, 0);
-                var xAxis = tmp.cross(cameraViewDir);
-                var camXTo = matrix4x4.get2DProjectionVector(cameraVector.add(xAxis.mul(20)));
                 context.beginPath();
                 context.strokeStyle = "#00ff00";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
                 context.lineTo(origX + camXTo.x, origY - camXTo.y);
                 context.stroke();
                 
-                var yAxis = cameraViewDir.cross(xAxis);
-                var camYTo = matrix4x4.get2DProjectionVector(cameraVector.add(yAxis.mul(20)));
                 context.beginPath();
                 context.strokeStyle = "#0000ff";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
@@ -138,6 +153,8 @@ and open the template in the editor.
                 if (evt.keyCode === 39) rotateRight = true;
                 if (evt.keyCode === 38) forward = true;
                 if (evt.keyCode === 40) backward = true;
+                if (evt.keyCode === 79) pitchDown = true;
+                if (evt.keyCode === 80) pitchUp = true;
             }
             
             function onKeyUp(evt) {
@@ -149,11 +166,18 @@ and open the template in the editor.
                 if (evt.keyCode === 39) rotateRight = false;
                 if (evt.keyCode === 38) forward = false;
                 if (evt.keyCode === 40) backward = false;
+                if (evt.keyCode === 79) pitchDown = false;
+                if (evt.keyCode === 80) pitchUp = false;
+            }
+            
+            function transposeFlag() {
+                transpose = !transpose;
             }
         </script>
     </head>
     <body>
         <canvas id="canvas"></canvas>
         <input type="file" id="file-input" />
+        <button id="transpose" value=">" onclick="transposeFlag()"></button>
     </body>
 </html>

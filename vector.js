@@ -68,8 +68,8 @@ class Vector {
         return this;
     }
     
-    dot() {
-        return this.x * this.x + this.y * this.y + this.z * this.z;
+    dot(vector) {
+        return this.x * vector.x + this.y * vector.y + this.z * vector.z;
     }
     
     cross(vector) {

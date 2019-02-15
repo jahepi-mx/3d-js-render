@@ -105,6 +105,16 @@ class Matrix4x4 {
         return newMatrix;
     }
     
+    buildOrthonormalMatrix(xAxis, yAxis, zAxis) {
+        var matrix = [
+            xAxis.x, yAxis.x, zAxis.x, 0,
+            xAxis.y, yAxis.y, zAxis.y, 0,
+            xAxis.z, yAxis.z, zAxis.z, 0,
+                  0,       0,       0, 1,
+        ];
+        return matrix;
+    }
+    
     get2DProjectionVector(vector) {
         var ratio = 300 / (300 + vector.z);
         var x = vector.x * ratio;
