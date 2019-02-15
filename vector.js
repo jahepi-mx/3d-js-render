@@ -84,4 +84,8 @@ class Vector {
         newVector.z = this.x * vector.y - this.y * vector.x;
         return newVector;
     }
+    
+    clone() {
+        return new Vector(this.x, this.y, this.z);
+    }
 }

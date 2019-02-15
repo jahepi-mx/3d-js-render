@@ -11,6 +11,8 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript" src="vector.js"></script>
         <script type="text/javascript" src="matrix4x4.js"></script>
+        <script type="text/javascript" src="triangle.js"></script>
+        <script type="text/javascript" src="mesh.js"></script>
         <script type="text/javascript">
             var width = 200;
             var height = 200;
@@ -28,7 +30,7 @@ and open the template in the editor.
             var backward = false;
             var speed = 20;
             var cameraRotation = Math.PI / 4;
-            var matrix4x4 = new Matrix4x4();
+            var matrix4x4 = Matrix4x4.getInstance();
             
             var cameraVector = new Vector(0, 0, 0);
             var cameraViewDir = new Vector(0, 0, 1);

@@ -1,7 +1,16 @@
+let matrix4x4Instance = null;
+
 class Matrix4x4 {
     
     constructor() {
         
+    }
+    
+    static getInstance() {
+        if (matrix4x4Instance === null) {
+            matrix4x4Instance = new Matrix4x4();
+        }
+        return matrix4x4Instance;
     }
  
     getZRotationM4x4(theta) {  
