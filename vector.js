@@ -55,12 +55,12 @@ class Vector {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
     
-    nomalize() {
+    normalize() {
         var length = this.length();
         return new Vector(this.x / length, this.y / length, this.z / length);
     }
     
-    nomalizeThis() {
+    normalizeThis() {
         var length = this.length();
         this.x /= length;
         this.y /= length;

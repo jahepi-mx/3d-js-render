@@ -13,6 +13,7 @@ and open the template in the editor.
         <script type="text/javascript" src="matrix4x4.js"></script>
         <script type="text/javascript" src="triangle.js"></script>
         <script type="text/javascript" src="mesh.js"></script>
+        <script type="text/javascript" src="utils.js"></script>
         <script type="text/javascript">
             var width = 200;
             var height = 200;
@@ -31,6 +32,7 @@ and open the template in the editor.
             var speed = 20;
             var cameraRotation = Math.PI / 4;
             var matrix4x4 = Matrix4x4.getInstance();
+            var mesh = null;
             
             var cameraVector = new Vector(0, 0, 0);
             var cameraViewDir = new Vector(0, 0, 1);
@@ -42,6 +44,19 @@ and open the template in the editor.
                 context = canvas.getContext("2d");
                 document.onkeydown = onKeyDown;
                 document.onkeyup = onKeyUp;
+                
+                var input = document.getElementById("file-input");
+                input.addEventListener("change", function(e) {
+                    var file = e.target.files[0];
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        mesh = Utils.getInstance().generateMesh(event.target.result);
+                        mesh.translation = new Vector(0, 20, 200);
+                        input.value = "";
+                    };
+                    reader.readAsText(file);
+                });
+                
                 requestAnimationFrame(update);
             };
             
@@ -106,6 +121,11 @@ and open the template in the editor.
                 context.lineTo(origX + camYTo.x, origY - camYTo.y);
                 context.stroke();
                 
+                if (mesh !== null) {
+                    mesh.transformLocal(matrix4x4.getYRotationM4x4(cameraRotation * dt));
+                    mesh.render(context);
+                }
+                
                 requestAnimationFrame(update);
             }
             
@@ -134,5 +154,6 @@ and open the template in the editor.
     </head>
     <body>
         <canvas id="canvas"></canvas>
+        <input type="file" id="file-input" />
     </body>
 </html>
