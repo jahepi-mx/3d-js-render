@@ -4,7 +4,9 @@ class ZBuffer {
         this.triangles = [];
         for (let mesh of meshes) {
             for (let triangle of mesh.triangles) {
-                this.triangles.push(triangle);
+                if (triangle.isVisible()) {
+                    this.triangles.push(triangle);
+                }
             }
         }
     }

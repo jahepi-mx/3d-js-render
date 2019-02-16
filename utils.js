@@ -18,7 +18,7 @@ class Utils {
             var parts = line.split(" ");
             if (parts[0] === "v") {
                 vertexs[a] = new Vector(parts[1], parts[2], parts[3]);
-                vertexs[a].mulThis(50);
+                vertexs[a].mulThis(150);
                 a++;
             } else if (parts[0] === "f") {
                 var triangle = new Triangle();

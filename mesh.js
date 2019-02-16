@@ -3,6 +3,7 @@ class Mesh {
     constructor() {
         this.translation = new Vector(0, 0, 0);
         this.triangles = [];
+        this.matrix4x4 = Matrix4x4.getInstance();
     }
     
     addTriangle(triangle) {
@@ -10,13 +11,15 @@ class Mesh {
     }
     
     transformViewMatrix(localTransMatrix, cameraViewDir, cameraPosition, pitch) {
+        var translationMatrix = this.matrix4x4.getTranslationOfViewMatrix(cameraPosition);
+        var viewMatrix = this.matrix4x4.getViewMatrix(cameraViewDir, pitch);
         for (let triangle of this.triangles) {
             // Change local space
             triangle.transformLocal(localTransMatrix);
             // Translate to world space
             triangle.translate(this.translation);
             // Transform to View Space
-            triangle.transormViewMatrix(cameraViewDir, cameraPosition, pitch);  
+            triangle.transormViewMatrix(translationMatrix, viewMatrix);  
         }
     }
     

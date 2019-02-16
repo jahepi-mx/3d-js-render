@@ -92,10 +92,11 @@ class Matrix4x4 {
             if (a % 4 === 0 && a > 0) {
                 x += 4;
             }
+            newMatrix[a] = 0;
             for (var i = 0, ny = y; i < 4; i++) {
                 var nx = x + i;
                 //console.log(nx + "," + ny);
-                newMatrix[a] = matrix4x4a[nx] * matrix4x4b[ny];
+                newMatrix[a] += matrix4x4a[nx] * matrix4x4b[ny];
                 ny += 4;                
             }
             //console.log("---->");
@@ -141,10 +142,13 @@ class Matrix4x4 {
         var xAxis = tmp.cross(cameraViewDir);          
         var yAxis = cameraViewDir.cross(xAxis);
         
-        var matrix = this.getXRotationM4x4(pitch);
-        xAxis = this.transform(matrix, xAxis);
-        yAxis = this.transform(matrix, yAxis);
-        zAxis = this.transform(matrix, zAxis);
+        var orthoNor = this.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
+        var camTran = this.transposeM4x4(orthoNor);
+        var camRot = this.getXRotationM4x4(pitch);
+        var m1 = this.transformM4x4(camRot, camTran);
+        m1 = this.transformM4x4(orthoNor, m1);
+        yAxis = this.transform(m1, yAxis);
+        zAxis = this.transform(m1, zAxis);
         
         var transposed = this.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
         transposed = this.transposeM4x4(transposed);

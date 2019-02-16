@@ -24,15 +24,14 @@ class Triangle {
         this.vWorld3 = this.vLocal3.add(vector);
     }
     
-    transormViewMatrix(cameraViewDir, cameraPosition, pitch) {
-        var matrix = matrix4x4.getTranslationOfViewMatrix(cameraPosition);
-        this.vWorld1 = matrix4x4.transform(matrix, this.vWorld1);
-        this.vWorld2 = matrix4x4.transform(matrix, this.vWorld2);
-        this.vWorld3 = matrix4x4.transform(matrix, this.vWorld3);
-        matrix = matrix4x4.getViewMatrix(cameraViewDir, pitch);
-        this.vWorld1 = matrix4x4.transform(matrix, this.vWorld1);
-        this.vWorld2 = matrix4x4.transform(matrix, this.vWorld2);
-        this.vWorld3 = matrix4x4.transform(matrix, this.vWorld3);
+    transormViewMatrix(translation, transpose) {
+        this.vWorld1 = this.matrix4x4.transform(translation, this.vWorld1);
+        this.vWorld2 = this.matrix4x4.transform(translation, this.vWorld2);
+        this.vWorld3 = this.matrix4x4.transform(translation, this.vWorld3);
+
+        this.vWorld1 = this.matrix4x4.transform(transpose, this.vWorld1);
+        this.vWorld2 = this.matrix4x4.transform(transpose, this.vWorld2);
+        this.vWorld3 = this.matrix4x4.transform(transpose, this.vWorld3);
     }
     
     getLocalNormal() {
@@ -44,7 +43,12 @@ class Triangle {
     getWorldNormal() {
         var sub1 = this.vWorld2.sub(this.vWorld1);
         var sub2 = this.vWorld3.sub(this.vWorld1);
-        return sub1.cross(sub2).normalizeThis().mulThis(10);
+        return sub1.cross(sub2).normalizeThis();
+    }
+    
+    isVisible() {
+        var dot = this.vWorld1.normalize().dot(this.getWorldNormal());
+        return dot <= 0.5;
     }
     
     renderWireframe(context) {
