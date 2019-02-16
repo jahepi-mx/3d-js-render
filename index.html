@@ -14,6 +14,7 @@ and open the template in the editor.
         <script type="text/javascript" src="triangle.js"></script>
         <script type="text/javascript" src="mesh.js"></script>
         <script type="text/javascript" src="utils.js"></script>
+        <script type="text/javascript" src="zbuffer.js"></script>
         <script type="text/javascript">
             var width = 200;
             var height = 200;
@@ -31,7 +32,7 @@ and open the template in the editor.
             var backward = false;
             var pitchUp = false;
             var pitchDown = false;
-            var speed = 20;
+            var speed = 100;
             var cameraRotation = Math.PI / 4;
             var matrix4x4 = Matrix4x4.getInstance();
             var mesh = null;
@@ -151,9 +152,16 @@ and open the template in the editor.
                 context.stroke();
                 
                 if (mesh !== null) {
-                    mesh.transformViewMatrix(matrix4x4.getYRotationM4x4(cameraRotation * dt), cameraViewDir, cameraVector, pitch);
+                    mesh.transformViewMatrix(matrix4x4.getIdentityMatrix(), cameraViewDir, cameraVector, pitch);
+                    var zBuffer = new ZBuffer([mesh]);
+                    zBuffer.sort();
+                    for (let triangle of zBuffer.triangles) {
+                        triangle.render(context);
+                    }
+                    //mesh.transformViewMatrix(matrix4x4.getIdentityMatrix(), cameraViewDir, cameraVector, pitch);
+                    //mesh.transformViewMatrix(matrix4x4.getYRotationM4x4(cameraRotation * dt), cameraViewDir, cameraVector, pitch);
                     //mesh.transform(matrix4x4.getYRotationM4x4(cameraRotation * dt));
-                    mesh.render(context);
+                    //mesh.render(context);
                 }
                 
                 requestAnimationFrame(update);

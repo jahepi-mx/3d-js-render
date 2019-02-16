@@ -125,6 +125,16 @@ class Matrix4x4 {
         return matrix;
     }
     
+    getIdentityMatrix() {
+        var matrix = [
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ];
+        return matrix;
+    }
+    
     getViewMatrix(cameraViewDir, pitch) {
         var zAxis = cameraViewDir;
         var tmp = new Vector(0, 1, 0);
