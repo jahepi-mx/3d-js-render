@@ -9,17 +9,7 @@ class Triangle {
         this.vWorld2 = new Vector(0, 0, 0);
         this.vWorld3 = new Vector(0, 0, 0);
         
-        this.vCam1 = new Vector(0, 0, 0);
-        this.vCam2 = new Vector(0, 0, 0);
-        this.vCam3 = new Vector(0, 0, 0);
-        
         this.matrix4x4 = Matrix4x4.getInstance();
-    }
-    
-    transformToCameraView(matrix) {
-        this.vCam1 = this.matrix4x4.transform(matrix, this.vWorld1);
-        this.vCam2 = this.matrix4x4.transform(matrix, this.vWorld2);
-        this.vCam3 = this.matrix4x4.transform(matrix, this.vWorld3);
     }
     
     transformLocal(matrix) {
@@ -34,6 +24,17 @@ class Triangle {
         this.vWorld3 = this.vLocal3.add(vector);
     }
     
+    transormViewMatrix(cameraViewDir, cameraPosition, pitch) {
+        var matrix = matrix4x4.getTranslationOfViewMatrix(cameraPosition);
+        this.vWorld1 = matrix4x4.transform(matrix, this.vWorld1);
+        this.vWorld2 = matrix4x4.transform(matrix, this.vWorld2);
+        this.vWorld3 = matrix4x4.transform(matrix, this.vWorld3);
+        matrix = matrix4x4.getViewMatrix(cameraViewDir, pitch);
+        this.vWorld1 = matrix4x4.transform(matrix, this.vWorld1);
+        this.vWorld2 = matrix4x4.transform(matrix, this.vWorld2);
+        this.vWorld3 = matrix4x4.transform(matrix, this.vWorld3);
+    }
+    
     getLocalNormal() {
         var sub1 = this.vLocal2.sub(this.vLocal1);
         var sub2 = this.vLocal3.sub(this.vLocal1);
@@ -45,6 +46,9 @@ class Triangle {
     }
     
     renderWireframe(context) {
+        if (this.vWorld1.z < 0 || this.vWorld2.z < 0 || this.vWorld3 < 0) {
+            return;
+        }
         var vWorld1 = this.matrix4x4.get2DProjectionVector(this.vWorld1);
         var vWorld2 = this.matrix4x4.get2DProjectionVector(this.vWorld2);
         var vWorld3 = this.matrix4x4.get2DProjectionVector(this.vWorld3);
@@ -57,6 +61,7 @@ class Triangle {
         context.stroke();
         
         // Draw normal
+        /*
         var normal = this.getLocalNormal().add(this.vWorld1);
         normal = this.matrix4x4.get2DProjectionVector(normal);
         context.beginPath();
@@ -64,5 +69,6 @@ class Triangle {
         context.moveTo(origX + vWorld1.x, origY - vWorld1.y);
         context.lineTo(origX + normal.x, origY - normal.y);
         context.stroke();
+        */
     }
 }

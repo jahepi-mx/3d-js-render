@@ -115,6 +115,32 @@ class Matrix4x4 {
         return matrix;
     }
     
+    getTranslationOfViewMatrix(cameraPosition) {
+        var matrix = [
+            1, 0, 0, -cameraPosition.x,
+            0, 1, 0, -cameraPosition.y,
+            0, 0, 1, -cameraPosition.z,
+            0, 0, 0, 1
+        ];
+        return matrix;
+    }
+    
+    getViewMatrix(cameraViewDir, pitch) {
+        var zAxis = cameraViewDir;
+        var tmp = new Vector(0, 1, 0);
+        var xAxis = tmp.cross(cameraViewDir);          
+        var yAxis = cameraViewDir.cross(xAxis);
+        
+        var matrix = this.getXRotationM4x4(pitch);
+        xAxis = this.transform(matrix, xAxis);
+        yAxis = this.transform(matrix, yAxis);
+        zAxis = this.transform(matrix, zAxis);
+        
+        var transposed = this.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
+        transposed = this.transposeM4x4(transposed);
+        return transposed;
+    }
+    
     get2DProjectionVector(vector) {
         var ratio = 300 / (300 + vector.z);
         var x = vector.x * ratio;

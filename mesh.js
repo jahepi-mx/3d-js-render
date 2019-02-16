@@ -9,15 +9,29 @@ class Mesh {
         this.triangles.push(triangle);
     }
     
-    transformLocal(matrix) {
+    transformViewMatrix(localTransMatrix, cameraViewDir, cameraPosition, pitch) {
         for (let triangle of this.triangles) {
-            triangle.transformLocal(matrix);
+            // Change local space
+            triangle.transformLocal(localTransMatrix);
+            // Translate to world space
+            triangle.translate(this.translation);
+            // Transform to View Space
+            triangle.transormViewMatrix(cameraViewDir, cameraPosition, pitch);  
+        }
+    }
+    
+    transform(localTransMatrix) {
+        for (let triangle of this.triangles) {
+            // Change local space
+            triangle.transformLocal(localTransMatrix);
+            // Translate to world space
+            triangle.translate(this.translation);
         }
     }
     
     render(context) {
         for (let triangle of this.triangles) {
-            triangle.translate(this.translation);
+            // Project mesh
             triangle.renderWireframe(context);
         }
     }

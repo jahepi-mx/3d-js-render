@@ -104,6 +104,19 @@ and open the template in the editor.
                 var xAxis = tmp.cross(cameraViewDir);          
                 var yAxis = cameraViewDir.cross(xAxis);
                 
+                if (pitchUp) {
+                    pitch += cameraRotation * dt;
+                }
+                
+                if (pitchDown) {
+                    pitch -= cameraRotation * dt;
+                }
+                
+                var matrix = matrix4x4.getXRotationM4x4(pitch);
+                xAxis = matrix4x4.transform(matrix, xAxis);
+                yAxis = matrix4x4.transform(matrix, yAxis);
+                zAxis = matrix4x4.transform(matrix, zAxis);
+                
                 if (transpose) {
                     var tm = matrix4x4.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
                     tm = matrix4x4.transposeM4x4(tm);
@@ -113,6 +126,7 @@ and open the template in the editor.
                     yAxis = new Vector(tm[1], tm[5], tm[9]);
                     zAxis = new Vector(tm[2], tm[6], tm[10]);
                 }
+
                 var camFrom = matrix4x4.get2DProjectionVector(cameraVector);
                 var camZTo = matrix4x4.get2DProjectionVector(cameraVector.add(zAxis.mul(20)));
                 var camXTo = matrix4x4.get2DProjectionVector(cameraVector.add(xAxis.mul(20)));
@@ -137,7 +151,8 @@ and open the template in the editor.
                 context.stroke();
                 
                 if (mesh !== null) {
-                    mesh.transformLocal(matrix4x4.getYRotationM4x4(cameraRotation * dt));
+                    mesh.transformViewMatrix(matrix4x4.getYRotationM4x4(cameraRotation * dt), cameraViewDir, cameraVector, pitch);
+                    //mesh.transform(matrix4x4.getYRotationM4x4(cameraRotation * dt));
                     mesh.render(context);
                 }
                 
