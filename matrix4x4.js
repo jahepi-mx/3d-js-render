@@ -136,12 +136,13 @@ class Matrix4x4 {
         return matrix;
     }
     
-    getViewMatrix(cameraViewDir, pitch) {
+    getViewMatrix(cameraViewDir) {
         var zAxis = cameraViewDir;
         var tmp = new Vector(0, 1, 0);
-        var xAxis = tmp.cross(cameraViewDir);          
-        var yAxis = cameraViewDir.cross(xAxis);
+        var xAxis = tmp.cross(cameraViewDir).normalize();          
+        var yAxis = cameraViewDir.cross(xAxis).normalize();
         
+        /*
         var orthoNor = this.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
         var camTran = this.transposeM4x4(orthoNor);
         var camRot = this.getXRotationM4x4(pitch);
@@ -149,7 +150,8 @@ class Matrix4x4 {
         m1 = this.transformM4x4(orthoNor, m1);
         yAxis = this.transform(m1, yAxis);
         zAxis = this.transform(m1, zAxis);
-        
+        */
+
         var transposed = this.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
         transposed = this.transposeM4x4(transposed);
         return transposed;

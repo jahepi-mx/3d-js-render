@@ -10,9 +10,9 @@ class Mesh {
         this.triangles.push(triangle);
     }
     
-    transformViewMatrix(localTransMatrix, cameraViewDir, cameraPosition, pitch) {
+    transformViewMatrix(localTransMatrix, cameraViewDir, cameraPosition) {
         var translationMatrix = this.matrix4x4.getTranslationOfViewMatrix(cameraPosition);
-        var viewMatrix = this.matrix4x4.getViewMatrix(cameraViewDir, pitch);
+        var viewMatrix = this.matrix4x4.getViewMatrix(cameraViewDir);
         for (let triangle of this.triangles) {
             // Change local space
             triangle.transformLocal(localTransMatrix);

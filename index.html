@@ -37,9 +37,11 @@ and open the template in the editor.
             var matrix4x4 = Matrix4x4.getInstance();
             var mesh = null;
             var pitch = 0;
+            var yaw = 0;
             
             var cameraVector = new Vector(0, 0, 0);
             var cameraViewDir = new Vector(0, 0, 1);
+            var cameraViewDirTmp = new Vector(0, 0, 1);
             
             window.onload = function() {
                 canvas = document.getElementById("canvas");
@@ -90,28 +92,45 @@ and open the template in the editor.
                     var scaledVector = cameraViewDir.mul(-speed);
                     cameraVector.addThis(scaledVector.mul(dt));
                 }
-                if (rotateLeft) {
-                    var matrix = matrix4x4.getYRotationM4x4(cameraRotation * dt);
-                    cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
-                }
-                if (rotateRight) {
-                    var matrix = matrix4x4.getYRotationM4x4(-cameraRotation * dt);
-                    cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
-                }
-                
-                var zAxis = cameraViewDir.clone();
-                var tmp = new Vector(0, 1, 0);
-                var xAxis = tmp.cross(zAxis);          
-                var yAxis = zAxis.cross(xAxis);
                 
                 if (pitchUp) {
                     pitch += cameraRotation * dt;
+                    if (pitch >= Math.PI / 2) {
+                        pitch = Math.PI / 2;
+                    }
                 }
                 
                 if (pitchDown) {
                     pitch -= cameraRotation * dt;
+                    if (pitch <= -Math.PI / 2) {
+                        pitch = -Math.PI / 2;
+                    }
                 }
                 
+                if (rotateLeft) {
+                    yaw += cameraRotation * dt;
+                    //var matrix = matrix4x4.getYRotationM4x4(cameraRotation * dt);
+                    //cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
+                }
+                if (rotateRight) {
+                    yaw -= cameraRotation * dt;
+                    //var matrix = matrix4x4.getYRotationM4x4(-cameraRotation * dt);
+                    //cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
+                }
+                
+                var yawRotM = matrix4x4.getYRotationM4x4(yaw);
+                var yawRotMT = matrix4x4.transposeM4x4(yawRotM);
+                var pitchRotM = matrix4x4.getXRotationM4x4(pitch);
+                var newMatrix = matrix4x4.transformM4x4(pitchRotM, yawRotMT);
+                var newMatrixTranspose = matrix4x4.transposeM4x4(newMatrix);
+                cameraViewDir = matrix4x4.transform(newMatrixTranspose, cameraViewDirTmp);
+                
+                var zAxis = cameraViewDir.normalize();
+                var tmp = new Vector(0, 1, 0);
+                var xAxis = tmp.cross(zAxis).normalize();          
+                var yAxis = zAxis.cross(xAxis).normalize();
+                
+                /*
                 var orthoNor = matrix4x4.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
                 var camTran = matrix4x4.transposeM4x4(orthoNor);
                 var camRot = matrix4x4.getXRotationM4x4(pitch);
@@ -119,32 +138,33 @@ and open the template in the editor.
                 m1 = matrix4x4.transformM4x4(orthoNor, m1);
                 yAxis = matrix4x4.transform(m1, yAxis);
                 zAxis = matrix4x4.transform(m1, zAxis);
-
+                */
+               
                 var camFrom = matrix4x4.get2DProjectionVector(cameraVector);
                 var camZTo = matrix4x4.get2DProjectionVector(cameraVector.add(zAxis.mul(20)));
                 var camXTo = matrix4x4.get2DProjectionVector(cameraVector.add(xAxis.mul(20)));
                 var camYTo = matrix4x4.get2DProjectionVector(cameraVector.add(yAxis.mul(20)));
                     
                 context.beginPath();
-                context.strokeStyle = "#ff0000";
+                context.strokeStyle = "#111";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
                 context.lineTo(origX + camZTo.x, origY - camZTo.y);
                 context.stroke();
                 
                 context.beginPath();
-                context.strokeStyle = "#00ff00";
+                context.strokeStyle = "#222";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
                 context.lineTo(origX + camXTo.x, origY - camXTo.y);
                 context.stroke();
                 
                 context.beginPath();
-                context.strokeStyle = "#0000ff";
+                context.strokeStyle = "#333";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
                 context.lineTo(origX + camYTo.x, origY - camYTo.y);
                 context.stroke();
                 
                 if (mesh !== null) {
-                    mesh.transformViewMatrix(matrix4x4.getIdentityMatrix(), cameraViewDir, cameraVector, pitch);
+                    mesh.transformViewMatrix(matrix4x4.getIdentityMatrix(), cameraViewDir, cameraVector);
                     var zBuffer = new ZBuffer([mesh]);
                     zBuffer.sort();
                     for (let triangle of zBuffer.triangles) {
@@ -186,9 +206,9 @@ and open the template in the editor.
             }
         </script>
     </head>
-    <body>
+    <body style="background-color: black">
         <div style="margin: 0 auto; text-align: center;">
-            <canvas id="canvas" style="background-color: black"></canvas>
+            <canvas id="canvas" style="background-color: black; border: 1px solid #222"></canvas>
             <br /><input type="file" id="file-input" />
         </div>
     </body>
