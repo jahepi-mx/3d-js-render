@@ -88,4 +88,9 @@ class Vector {
     clone() {
         return new Vector(this.x, this.y, this.z);
     }
+    
+    rasterize(width, height) {
+        this.x = width * 0.5 * this.x;
+        this.y = height * 0.5 * this.y;
+    }
 }

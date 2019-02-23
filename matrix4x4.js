@@ -66,6 +66,10 @@ class Matrix4x4 {
         newVector.y = matrix4x4[4] * vector.x + matrix4x4[5] * vector.y + matrix4x4[6] * vector.z + matrix4x4[7] * vector.w;
         newVector.z = matrix4x4[8] * vector.x + matrix4x4[9] * vector.y + matrix4x4[10] * vector.z + matrix4x4[11] * vector.w;
         newVector.w = matrix4x4[12] * vector.x + matrix4x4[13] * vector.y + matrix4x4[14] * vector.z + matrix4x4[15] * vector.w;
+        
+        if (newVector.w !== 1) {
+            newVector.divThis(newVector.w);
+        }
         return newVector;
     }
     
@@ -141,20 +145,33 @@ class Matrix4x4 {
         var tmp = new Vector(0, 1, 0);
         var xAxis = tmp.cross(cameraViewDir).normalize();          
         var yAxis = cameraViewDir.cross(xAxis).normalize();
-        
-        /*
-        var orthoNor = this.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
-        var camTran = this.transposeM4x4(orthoNor);
-        var camRot = this.getXRotationM4x4(pitch);
-        var m1 = this.transformM4x4(camRot, camTran);
-        m1 = this.transformM4x4(orthoNor, m1);
-        yAxis = this.transform(m1, yAxis);
-        zAxis = this.transform(m1, zAxis);
-        */
 
         var transposed = this.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
         transposed = this.transposeM4x4(transposed);
         return transposed;
+    }
+    
+    getPespectiveProjectionMatrix(fov, near, far) {
+        var matrix = this.getIdentityMatrix();
+        var scale = 1 / Math.tan(fov * 0.5 * Math.PI / 180);
+        matrix[0] = scale;
+        matrix[5] = scale;
+        matrix[10] = far / (far - near);
+        matrix[11] = far * near / (far - near);
+        matrix[14] = 1;
+        matrix[15] = 0;
+        
+        /*
+        f1 = far / (far - near)
+        f2 = far * near / (far - near)
+        scale = 1 / Math.tan(fov * 0.5 * Math.PI / 180)
+        x = x * scale
+        y = y * scale
+        z = z * f1 + f2
+        w = z
+         */
+        
+        return matrix;
     }
     
     get2DProjectionVector(vector) {

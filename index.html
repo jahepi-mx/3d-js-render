@@ -38,6 +38,7 @@ and open the template in the editor.
             var mesh = null;
             var pitch = 0;
             var yaw = 0;
+            var projectionMatrix = matrix4x4.getPespectiveProjectionMatrix(90, 1, 100);
             
             var cameraVector = new Vector(0, 0, 0);
             var cameraViewDir = new Vector(0, 0, 1);
@@ -57,7 +58,7 @@ and open the template in the editor.
                     var reader = new FileReader();
                     reader.onload = function(event) {
                         mesh = Utils.getInstance().generateMesh(event.target.result);
-                        mesh.translation = new Vector(0, 20, 200);
+                        mesh.translation = new Vector(0, -700, 800);
                         input.value = "";
                     };
                     reader.readAsText(file);
@@ -109,13 +110,9 @@ and open the template in the editor.
                 
                 if (rotateLeft) {
                     yaw += cameraRotation * dt;
-                    //var matrix = matrix4x4.getYRotationM4x4(cameraRotation * dt);
-                    //cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
                 }
                 if (rotateRight) {
                     yaw -= cameraRotation * dt;
-                    //var matrix = matrix4x4.getYRotationM4x4(-cameraRotation * dt);
-                    //cameraViewDir = matrix4x4.transform(matrix, cameraViewDir);
                 }
                 
                 var yawRotM = matrix4x4.getYRotationM4x4(yaw);
@@ -128,37 +125,37 @@ and open the template in the editor.
                 var zAxis = cameraViewDir.normalize();
                 var tmp = new Vector(0, 1, 0);
                 var xAxis = tmp.cross(zAxis).normalize();          
-                var yAxis = zAxis.cross(xAxis).normalize();
-                
-                /*
-                var orthoNor = matrix4x4.buildOrthonormalMatrix(xAxis, yAxis, zAxis);
-                var camTran = matrix4x4.transposeM4x4(orthoNor);
-                var camRot = matrix4x4.getXRotationM4x4(pitch);
-                var m1 = matrix4x4.transformM4x4(camRot, camTran);
-                m1 = matrix4x4.transformM4x4(orthoNor, m1);
-                yAxis = matrix4x4.transform(m1, yAxis);
-                zAxis = matrix4x4.transform(m1, zAxis);
-                */
+                var yAxis = zAxis.cross(xAxis).normalize();             
                
+                var camFrom = matrix4x4.transform(projectionMatrix, cameraVector);
+                var camZTo = matrix4x4.transform(projectionMatrix, cameraVector.add(zAxis.mul(20)));
+                var camXTo = matrix4x4.transform(projectionMatrix, cameraVector.add(xAxis.mul(20)));
+                var camYTo = matrix4x4.transform(projectionMatrix, cameraVector.add(yAxis.mul(20)));
+                camFrom.rasterize(width, height);
+                camZTo.rasterize(width, height);
+                camXTo.rasterize(width, height);
+                camYTo.rasterize(width, height);
+               /*
                 var camFrom = matrix4x4.get2DProjectionVector(cameraVector);
                 var camZTo = matrix4x4.get2DProjectionVector(cameraVector.add(zAxis.mul(20)));
                 var camXTo = matrix4x4.get2DProjectionVector(cameraVector.add(xAxis.mul(20)));
                 var camYTo = matrix4x4.get2DProjectionVector(cameraVector.add(yAxis.mul(20)));
-                    
+                 */
+                
                 context.beginPath();
-                context.strokeStyle = "#111";
+                context.strokeStyle = "#ff0000";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
                 context.lineTo(origX + camZTo.x, origY - camZTo.y);
                 context.stroke();
                 
                 context.beginPath();
-                context.strokeStyle = "#222";
+                context.strokeStyle = "#00ff00";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
                 context.lineTo(origX + camXTo.x, origY - camXTo.y);
                 context.stroke();
                 
                 context.beginPath();
-                context.strokeStyle = "#333";
+                context.strokeStyle = "#0000ff";
                 context.moveTo(origX + camFrom.x, origY - camFrom.y);
                 context.lineTo(origX + camYTo.x, origY - camYTo.y);
                 context.stroke();
@@ -168,14 +165,9 @@ and open the template in the editor.
                     var zBuffer = new ZBuffer([mesh]);
                     zBuffer.sort();
                     for (let triangle of zBuffer.triangles) {
-                        triangle.render(context);
+                        triangle.render(context, projectionMatrix);
                     }
-                    //mesh.transformViewMatrix(matrix4x4.getIdentityMatrix(), cameraViewDir, cameraVector, pitch);
-                    //mesh.transformViewMatrix(matrix4x4.getYRotationM4x4(cameraRotation * dt), cameraViewDir, cameraVector, pitch);
-                    //mesh.transform(matrix4x4.getYRotationM4x4(cameraRotation * dt));
-                    //mesh.render(context);
                 }
-                
                 requestAnimationFrame(update);
             }
             
