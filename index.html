@@ -38,7 +38,7 @@ and open the template in the editor.
             var mesh = null;
             var pitch = 0;
             var yaw = 0;
-            var projectionMatrix = matrix4x4.getPespectiveProjectionMatrix(90, 1, 100);
+            var projectionMatrix = matrix4x4.getPespectiveProjectionMatrix(90, 1, 100, width / height);
             
             var cameraVector = new Vector(0, 0, 0);
             var cameraViewDir = new Vector(0, 0, 1);
@@ -135,12 +135,6 @@ and open the template in the editor.
                 camZTo.rasterize(width, height);
                 camXTo.rasterize(width, height);
                 camYTo.rasterize(width, height);
-               /*
-                var camFrom = matrix4x4.get2DProjectionVector(cameraVector);
-                var camZTo = matrix4x4.get2DProjectionVector(cameraVector.add(zAxis.mul(20)));
-                var camXTo = matrix4x4.get2DProjectionVector(cameraVector.add(xAxis.mul(20)));
-                var camYTo = matrix4x4.get2DProjectionVector(cameraVector.add(yAxis.mul(20)));
-                 */
                 
                 context.beginPath();
                 context.strokeStyle = "#ff0000";

@@ -92,15 +92,6 @@ class Triangle {
         if (this.vWorld1.z <= 0 || this.vWorld2.z <= 0 || this.vWorld3.z <= 0) {
             return;
         }
-        
-        /*
-        if (this.vWorld1.z < -100 || this.vWorld2.z < -100 || this.vWorld3.z < -100) {
-            return;
-        }
-        var vWorld1 = this.matrix4x4.get2DProjectionVector(this.vWorld1);
-        var vWorld2 = this.matrix4x4.get2DProjectionVector(this.vWorld2);
-        var vWorld3 = this.matrix4x4.get2DProjectionVector(this.vWorld3);
-        */
        
         // Draw normal
         var normal = this.getLocalNormal().normalizeThis();

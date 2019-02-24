@@ -76,23 +76,6 @@ class Matrix4x4 {
     transformM4x4(matrix4x4a, matrix4x4b) {
         var newMatrix = [];
         for (var a = 0, x = 0, y = 0; a < 4 * 4; a++) {
-            // (0,0 * 0,0) + (1,0 * 1,0) + (2,0 * 2,0) + (3,0 * 3,0)
-            // (0 * 0) + (1 * 4) + (2 * 8) + (3 * 12)
-            // (0,0 * 1,0) + (1,0 * 1,1) + (2,0 * 1,2) + (3,0 * 1,3)
-            // (0 * 1) + (1 * 5) + (2 * 9) + (3 * 13)
-            // (0,0 * 2,0) + (1,0 * 2,1) + (2,0 * 2,2) + (3,0 * 2,3)
-            // (0 * 2) + (1 * 6) + (2 * 10) + (3 * 14)
-            // (0,0 * 3,0) + (1,0 * 3,1) + (2,0 * 3,2) + (3,0 * 3,3)
-            // (0 * 3) + (1 * 7) + (2 * 11) + (3 * 15)
-            
-            // (0,1 * 0,0) + (1,1 * 1,0) + (2,1 * 2,0) + (3,1 * 3,0)
-            // (4 * 0) + (5 * 4) + (6 * 8) + (7 * 12)
-            // (0,1 * 1,0) + (1,1 * 1,1) + (2,1 * 1,2) + (3,1 * 1,3)
-            // (4 * 1) + (5 * 5) + (6 * 9) + (7 * 13)
-            // (0,1 * 2,0) + (1,1 * 2,1) + (2,1 * 2,2) + (3,1 * 2,3)
-            // (4 * 2) + (5 * 6) + (6 * 10) + (7 * 14)
-            // (0,1 * 3,0) + (1,1 * 3,1) + (2,1 * 3,2) + (3,1 * 3,3)
-            // (4 * 3) + (5 * 7) + (6 * 11) + (7 * 15)
             if (a % 4 === 0 && a > 0) {
                 x += 4;
             }
@@ -151,26 +134,51 @@ class Matrix4x4 {
         return transposed;
     }
     
-    getPespectiveProjectionMatrix(fov, near, far) {
-        var matrix = this.getIdentityMatrix();
-        var scale = 1 / Math.tan(fov * 0.5 * Math.PI / 180);
-        matrix[0] = scale;
-        matrix[5] = scale;
-        matrix[10] = far / (far - near);
-        matrix[11] = far * near / (far - near);
-        matrix[14] = 1;
-        matrix[15] = 0;
-        
+    getPespectiveProjectionMatrix(fov, near, far, aspectRatio) {
         /*
+        aspectRatio = width / height
         f1 = far / (far - near)
-        f2 = far * near / (far - near)
-        scale = 1 / Math.tan(fov * 0.5 * Math.PI / 180)
-        x = x * scale
-        y = y * scale
+        f2 = -far * near / (far - near)
+        
+        -> Normalize the values from -1 to 1 when divided by the Z component, with these values
+        -> you can rasterize the image to the screen
+        scaleX = 1 / aspectRatio * Math.tan(fov * 0.5 * Math.PI / 180)
+        scaleY = 1 / Math.tan(fov * 0.5 * Math.PI / 180)
+        
+        x = x * scaleX
+        y = y * scaleY
         z = z * f1 + f2
         w = z
+        --------------------------------------------------------------
+        
+        f1 = far / (far - near)
+        f2 = -far * near / (far - near)
+        z = z * f1 + f2
+        
+        This equation normalize the Z value to [0-1] range values, it could be written like this:
+        z = (z - near) / (far - near)
+        This give us the ratio BUT in order to normalize the value with the help of the 'transform' method
+        which transforms the coordinates to perspective coordinates if the W value is different than 1 dividing by it,
+        it has to be done like this:
+        
+        f1 = (far * z) / (far - near)
+        f2 = (far * near) / (far - near)
+        
+        finalValue = (f1 - f2) / z
+        
+        The final value is divided by Z (Which is W in the perspective matrix) to normalize the values in the range from 0 to 1
          */
         
+        var matrix = this.getIdentityMatrix();
+        var tan = Math.tan(fov * 0.5 * Math.PI / 180);
+        var scaleX = 1 / aspectRatio * tan;
+        var scaleY = 1 / tan;
+        matrix[0] = scaleX;
+        matrix[5] = scaleY;
+        matrix[10] = far / (far - near);
+        matrix[11] = -far * near / (far - near);
+        matrix[14] = 1;
+        matrix[15] = 0;
         return matrix;
     }
     
