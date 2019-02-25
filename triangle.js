@@ -89,7 +89,7 @@ class Triangle {
         vWorld2.rasterize(width, height);
         vWorld3.rasterize(width, height);
         
-        if (this.vWorld1.z <= 0 || this.vWorld2.z <= 0 || this.vWorld3.z <= 0) {
+        if (vWorld1.z <= 0 || vWorld2.z <= 0 || vWorld3.z <= 0) {
             return;
         }
        

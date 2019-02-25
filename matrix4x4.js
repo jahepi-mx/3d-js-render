@@ -68,7 +68,10 @@ class Matrix4x4 {
         newVector.w = matrix4x4[12] * vector.x + matrix4x4[13] * vector.y + matrix4x4[14] * vector.z + matrix4x4[15] * vector.w;
         
         if (newVector.w !== 1) {
-            newVector.divThis(newVector.w);
+            newVector.x /= newVector.w;
+            newVector.y /= newVector.w;
+            // To avoid reflection
+            newVector.z /= newVector.w < 0 ? -newVector.w : newVector.w;
         }
         return newVector;
     }
