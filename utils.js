@@ -30,4 +30,26 @@ class Utils {
         }
         return mesh;
     }
+    
+    generateN64Mesh(textFile) {
+	var mesh = new Mesh();
+	var lines = textFile.split("\n");
+        var vertexs = [];
+        var a = 0;
+        for (let line of lines) {
+            line = line.replace(/  +/g, ' ');
+            var parts = line.split(" ");
+            if (parts[0] === "v") {
+                vertexs[a] = new Vector(parts[1], parts[2], parts[3]);
+                a++;
+            } else if (parts[0] === "f") {
+                var triangle = new Triangle();
+                triangle.vLocal1 = vertexs[parseInt(parts[1].split("/")[0]) - 1];
+                triangle.vLocal2 = vertexs[parseInt(parts[2].split("/")[0]) - 1];
+                triangle.vLocal3 = vertexs[parseInt(parts[3].split("/")[0]) - 1];
+                mesh.addTriangle(triangle);
+            }
+        }
+        return mesh;
+    }
 }
