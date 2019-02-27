@@ -48,7 +48,7 @@ class Triangle {
     
     isVisible() {
         var dot = this.vWorld1.normalize().dot(this.getWorldNormal());
-        return dot <= 0.5;
+        return dot <= 0;
     }
     
     renderWireframe(context) {
