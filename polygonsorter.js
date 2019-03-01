@@ -1,11 +1,14 @@
-class ZBuffer {
+class PolygonSorter {
     
-    constructor(meshes) {
+    constructor(meshes, clipping) {
         this.triangles = [];
         for (let mesh of meshes) {
             for (let triangle of mesh.triangles) {
                 if (triangle.isVisible()) {
-                    this.triangles.push(triangle);
+                    var newTriangles = clipping.clipNearZPlane(triangle);
+                    for (let newTriangle of newTriangles) {
+                        this.triangles.push(newTriangle);
+                    }
                 }
             }
         }

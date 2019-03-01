@@ -89,10 +89,12 @@ class Triangle {
         vWorld2.rasterize(width, height);
         vWorld3.rasterize(width, height);
         
+        /*
         if (vWorld1.z <= 0 || vWorld2.z <= 0 || vWorld3.z <= 0) {
             return;
         }
-       
+       */
+      
         // Draw normal
         var normal = this.getLocalNormal().normalizeThis();
         var lightSource = new Vector(0, 0, 1);
@@ -102,7 +104,7 @@ class Triangle {
         var color = parseInt(255 * ratio);
         context.beginPath();
         context.fillStyle = "rgb(" + color + ", " + color + ", " + color + ")";
-        context.strokeStyle = context.fillStyle;
+        context.strokeStyle = context.fillStyle
         context.moveTo(origX + vWorld1.x, origY - vWorld1.y);
         context.lineTo(origX + vWorld2.x, origY - vWorld2.y);
         context.lineTo(origX + vWorld3.x, origY - vWorld3.y);

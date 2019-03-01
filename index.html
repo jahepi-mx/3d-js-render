@@ -13,10 +13,11 @@ and open the template in the editor.
         <script type="text/javascript" src="matrix4x4.js"></script>
         <script type="text/javascript" src="triangle.js"></script>
         <script type="text/javascript" src="mesh.js"></script>
+        <script type="text/javascript" src="clipping.js"></script>
         <script type="text/javascript" src="utils.js"></script>
-        <script type="text/javascript" src="zbuffer.js"></script>
+        <script type="text/javascript" src="polygonsorter.js"></script>
         <script type="text/javascript">
-            var width = 400;
+            var width = 533;
             var height = 400;
             var origX = width / 2;
             var origY = height / 2;
@@ -39,6 +40,7 @@ and open the template in the editor.
             var pitch = 0;
             var yaw = 0;
             var projectionMatrix = matrix4x4.getPespectiveProjectionMatrix(90, 1, 100, width / height);
+            var clipping = new Clipping();
             
             var cameraVector = new Vector(0, 0, 0);
             var cameraViewDir = new Vector(0, 0, 1);
@@ -57,7 +59,7 @@ and open the template in the editor.
                     var file = e.target.files[0];
                     var reader = new FileReader();
                     reader.onload = function(event) {
-                        mesh = Utils.getInstance().generateMesh(event.target.result);
+                        mesh = Utils.getInstance().generateN64Mesh(event.target.result);
                         mesh.translation = new Vector(0, -700, 800);
                         input.value = "";
                     };
@@ -156,9 +158,9 @@ and open the template in the editor.
                 
                 if (mesh !== null) {
                     mesh.transformViewMatrix(matrix4x4.getIdentityMatrix(), cameraViewDir, cameraVector);
-                    var zBuffer = new ZBuffer([mesh]);
-                    zBuffer.sort();
-                    for (let triangle of zBuffer.triangles) {
+                    var polygonSorter = new PolygonSorter([mesh], clipping);
+                    polygonSorter.sort();
+                    for (let triangle of polygonSorter.triangles) {
                         triangle.render(context, projectionMatrix);
                     }
                 }
