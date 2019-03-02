@@ -73,7 +73,7 @@ and open the template in the editor.
                 prevTime = time;
                 
                 context.clearRect(0, 0, width, height);
-                
+
                 // Camera manipulation
                 if (left) {
                     cameraVector.x -= speed * dt;
@@ -164,6 +164,12 @@ and open the template in the editor.
                         triangle.render(context, projectionMatrix);
                     }
                 }
+                
+                var fps = parseInt(1 / dt);
+                context.fillStyle = "#00ff00";
+                context.font = "20px Arial";
+                context.fillText(fps, 20, 20);
+                
                 requestAnimationFrame(update);
             }
             

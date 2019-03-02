@@ -51,32 +51,6 @@ class Triangle {
         return dot <= 0;
     }
     
-    renderWireframe(context) {
-        if (this.vWorld1.z < 0 || this.vWorld2.z < 0 || this.vWorld3 < 0) {
-            return;
-        }
-        var vWorld1 = this.matrix4x4.get2DProjectionVector(this.vWorld1);
-        var vWorld2 = this.matrix4x4.get2DProjectionVector(this.vWorld2);
-        var vWorld3 = this.matrix4x4.get2DProjectionVector(this.vWorld3);
-        context.beginPath();
-        context.strokeStyle = "#ccc";
-        context.moveTo(origX + vWorld1.x, origY - vWorld1.y);
-        context.lineTo(origX + vWorld2.x, origY - vWorld2.y);
-        context.lineTo(origX + vWorld3.x, origY - vWorld3.y);
-        context.lineTo(origX + vWorld1.x, origY - vWorld1.y);
-        context.stroke();
-        
-        // Draw normal
-        var normal = this.getWorldNormal().add(this.vWorld1);
-        normal = this.matrix4x4.get2DProjectionVector(normal);
-        context.beginPath();
-        context.strokeStyle = "#ff0000";
-        context.moveTo(origX + vWorld1.x, origY - vWorld1.y);
-        context.lineTo(origX + normal.x, origY - normal.y);
-        context.stroke();
-        
-    }
-    
     render(context, projectionMatrix) {
         
         // Camera View to 2D projection space normalized.
@@ -88,29 +62,35 @@ class Triangle {
         vWorld1.rasterize(width, height);
         vWorld2.rasterize(width, height);
         vWorld3.rasterize(width, height);
+            
+        var tmpTriangle = new Triangle();
+        tmpTriangle.vWorld1 = vWorld1;
+        tmpTriangle.vWorld2 = vWorld2;
+        tmpTriangle.vWorld3 = vWorld3;
+        tmpTriangle.vLocal1 = this.vLocal1;
+        tmpTriangle.vLocal2 = this.vLocal2;
+        tmpTriangle.vLocal3 = this.vLocal3;
+        var clippedTriangles = clipping.clipScreenTriangle(tmpTriangle);
         
-        /*
-        if (vWorld1.z <= 0 || vWorld2.z <= 0 || vWorld3.z <= 0) {
-            return;
+        for (let clippedTri of clippedTriangles) {
+            
+            // Draw normal
+            var normal = clippedTri.getLocalNormal().normalizeThis();
+            var lightSource = new Vector(0, 0, 1);
+            var dot = normal.dot(lightSource);
+
+            var ratio = (dot + 1) / 2;
+            var color = parseInt(255 * ratio);
+            context.beginPath();
+            context.fillStyle = "rgb(" + color + ", " + color + ", " + color + ")";
+            context.strokeStyle = context.fillStyle;
+            context.moveTo(origX + clippedTri.vWorld1.x, origY - clippedTri.vWorld1.y);
+            context.lineTo(origX + clippedTri.vWorld2.x, origY - clippedTri.vWorld2.y);
+            context.lineTo(origX + clippedTri.vWorld3.x, origY - clippedTri.vWorld3.y);
+            context.lineTo(origX + clippedTri.vWorld1.x, origY - clippedTri.vWorld1.y);
+            context.stroke();
+            context.fill();
         }
-       */
-      
-        // Draw normal
-        var normal = this.getLocalNormal().normalizeThis();
-        var lightSource = new Vector(0, 0, 1);
-        var dot = normal.dot(lightSource);
-        
-        var ratio = (dot + 1) / 2;
-        var color = parseInt(255 * ratio);
-        context.beginPath();
-        context.fillStyle = "rgb(" + color + ", " + color + ", " + color + ")";
-        context.strokeStyle = context.fillStyle
-        context.moveTo(origX + vWorld1.x, origY - vWorld1.y);
-        context.lineTo(origX + vWorld2.x, origY - vWorld2.y);
-        context.lineTo(origX + vWorld3.x, origY - vWorld3.y);
-        context.lineTo(origX + vWorld1.x, origY - vWorld1.y);
-        context.stroke();
-        context.fill();    
     }
     
     getAverageZ() {
