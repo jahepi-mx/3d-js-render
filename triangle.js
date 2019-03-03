@@ -9,6 +9,12 @@ class Triangle {
         this.vWorld2 = new Vector(0, 0, 0);
         this.vWorld3 = new Vector(0, 0, 0);
         
+        // For precalculated normal
+        this.isPrecalculatedNormal = false;
+        this.vNormal = new Vector(0, 0, 0);
+        this.vNormalLocal = new Vector(0, 0, 0); // (Normal + this.vLocal1)
+        this.vNormalWorld = new Vector(0, 0, 0);
+        
         this.matrix4x4 = Matrix4x4.getInstance();
     }
     
@@ -16,12 +22,18 @@ class Triangle {
         this.vLocal1 = this.matrix4x4.transform(matrix, this.vLocal1);
         this.vLocal2 = this.matrix4x4.transform(matrix, this.vLocal2);
         this.vLocal3 = this.matrix4x4.transform(matrix, this.vLocal3);
+        if (this.isPrecalculatedNormal) {
+            this.vNormalLocal = this.matrix4x4.transform(matrix, this.vNormalLocal);
+        }
     }
     
     translate(vector) {
         this.vWorld1 = this.vLocal1.add(vector);
         this.vWorld2 = this.vLocal2.add(vector);
         this.vWorld3 = this.vLocal3.add(vector);
+        if (this.isPrecalculatedNormal) {
+            this.vNormalWorld = this.vNormalLocal.add(vector);
+        }
     }
     
     transormViewMatrix(translation, transpose) {
@@ -32,6 +44,11 @@ class Triangle {
         this.vWorld1 = this.matrix4x4.transform(transpose, this.vWorld1);
         this.vWorld2 = this.matrix4x4.transform(transpose, this.vWorld2);
         this.vWorld3 = this.matrix4x4.transform(transpose, this.vWorld3);
+        
+        if (this.isPrecalculatedNormal) {
+            this.vNormalWorld = this.matrix4x4.transform(translation, this.vNormalWorld);
+            this.vNormalWorld = this.matrix4x4.transform(transpose, this.vNormalWorld);
+        }
     }
     
     getLocalNormal() {
@@ -47,6 +64,12 @@ class Triangle {
     }
     
     isVisible() {
+        if (this.isPrecalculatedNormal) {
+            var normal = this.vNormalWorld.sub(this.vWorld1);
+            var dot = this.vWorld1.normalize().dot(normal);
+            return dot <= 0;
+        }
+        
         var dot = this.vWorld1.normalize().dot(this.getWorldNormal());
         return dot <= 0;
     }
@@ -74,10 +97,15 @@ class Triangle {
         
         for (let clippedTri of clippedTriangles) {
             
-            // Draw normal
-            var normal = clippedTri.getLocalNormal().normalizeThis();
+            // Lighting
+            var dot = 0;
             var lightSource = new Vector(0, 0, 1);
-            var dot = normal.dot(lightSource);
+            if (this.isPrecalculatedNormal) {
+                dot = this.vNormal.dot(lightSource);
+            } else {
+                var normal = clippedTri.getLocalNormal().normalizeThis();
+                dot = normal.dot(lightSource);
+            }
 
             var ratio = (dot + 1) / 2;
             var color = parseInt(255 * ratio);

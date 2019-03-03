@@ -59,7 +59,7 @@ and open the template in the editor.
                     var file = e.target.files[0];
                     var reader = new FileReader();
                     reader.onload = function(event) {
-                        mesh = Utils.getInstance().generateN64Mesh(event.target.result);
+                        mesh = Utils.getInstance().generateMesh(event.target.result, 1);
                         mesh.translation = new Vector(0, -700, 800);
                         input.value = "";
                     };
