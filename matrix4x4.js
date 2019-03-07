@@ -70,8 +70,7 @@ class Matrix4x4 {
         if (newVector.w !== 1) {
             newVector.x /= newVector.w;
             newVector.y /= newVector.w;
-            // To avoid reflection
-            newVector.z /= newVector.w < 0 ? -newVector.w : newVector.w;
+            newVector.z /= newVector.w;
         }
         return newVector;
     }
