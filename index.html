@@ -6,9 +6,32 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>TODO supply a title</title>
+        <title>3D Render</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style type="text/css">
+            body, canvas {
+                background-color: black;
+            }
+            table {
+                color: #fff;
+                border-collapse: collapse;
+            }
+            table td {
+                text-align: left;
+                padding: 0.2em;
+            }
+            div {
+                margin: 0 auto; 
+                text-align: center;
+            }
+            #canvas {
+                border: 1px solid #222;
+                height: 100vh; 
+                width: 100vw; 
+                display: block;
+            }
+        </style>
         <script type="text/javascript" src="vector.js"></script>
         <script type="text/javascript" src="matrix4x4.js"></script>
         <script type="text/javascript" src="triangle.js"></script>
@@ -38,11 +61,11 @@ and open the template in the editor.
             var matrix4x4 = Matrix4x4.getInstance();
             var mesh = null;
             var pitch = 0;
-            var yaw = 0;
+            var yaw = -Math.PI / 4;
             var projectionMatrix = matrix4x4.getPespectiveProjectionMatrix(90, 1, 100, width / height);
             var clipping = new Clipping();
             
-            var cameraVector = new Vector(0, 0, 0);
+            var cameraVector = new Vector(13000, 2800, 600);
             var cameraViewDir = new Vector(0, 0, 1);
             var cameraViewDirTmp = new Vector(0, 0, 1);
             
@@ -54,19 +77,47 @@ and open the template in the editor.
                 document.onkeydown = onKeyDown;
                 document.onkeyup = onKeyUp;
                 
-                var input = document.getElementById("file-input");
-                input.addEventListener("change", function(e) {
-                    var file = e.target.files[0];
-                    var reader = new FileReader();
-                    reader.onload = function(event) {
-                        mesh = Utils.getInstance().generateMesh(event.target.result, 1);
-                        mesh.translation = new Vector(0, -700, 800);
-                        input.value = "";
-                    };
-                    reader.readAsText(file);
-                });                
+                onClickLoadBtn();           
                 requestAnimationFrame(update);
             };
+            
+            function onClickLoadBtn() {
+                var input = document.getElementById("file_input");
+                var file = input.files[0];
+                if (file === undefined) {
+                    var loadFile = new XMLHttpRequest();
+                    loadFile.open('GET', 'maps/temple.obj');
+                    loadFile.onreadystatechange = function() {
+                        loadModelData(loadFile.responseText)
+                    }
+                    loadFile.send();
+                } else {
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        loadModelData(event.target.result);
+                    };
+                    reader.readAsText(file);
+                }
+            }
+            
+            function loadModelData(data) {
+                var input = document.getElementById("file_input");
+                var scale = parseFloat(document.getElementById("model_scale").value);
+                var modelX = parseFloat(document.getElementById("model_x").value);
+                var modelY = parseFloat(document.getElementById("model_y").value);
+                var modelZ = parseFloat(document.getElementById("model_z").value);
+                var cameraX = parseFloat(document.getElementById("camera_x").value);
+                var cameraY = parseFloat(document.getElementById("camera_y").value);
+                var cameraZ = parseFloat(document.getElementById("camera_z").value);
+                cameraVector.x = cameraX;
+                cameraVector.y = cameraY;
+                cameraVector.z = cameraZ;
+                yaw = -Math.PI / 4;
+                pitch = 0;
+                mesh = Utils.getInstance().generateMesh(data, scale);
+                mesh.translation = new Vector(modelX, modelY, modelZ);
+                input.value = "";
+            }
             
             function update(time) {
                 var dt = (time - prevTime) / 1000;
@@ -200,10 +251,52 @@ and open the template in the editor.
             }
         </script>
     </head>
-    <body style="background-color: black">
-        <div style="margin: 0 auto; text-align: center;">
-            <canvas id="canvas" style="background-color: black; border: 1px solid #222"></canvas>
-            <br /><input type="file" id="file-input" />
+    <body>
+        <div>   
+            <table>
+                <tr>
+                    <td>File</td>
+                    <td><input type="file" id="file_input" /></td>
+                </tr>
+                <tr>
+                    <td>Model Scale</td>
+                    <td><input type="number" id="model_scale" value="0.5" /></td>
+                </tr>
+                <tr>
+                    <td>Model Position</td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>x</td>
+                                <td><input type="number" id="model_x" value="11500" /></td>
+                                <td>y</td>
+                                <td><input type="number" id="model_y" value="900" /></td>
+                                <td>z</td>
+                                <td><input type="number" id="model_z" value="800" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Camera Position</td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>x</td>
+                                <td><input type="number" id="camera_x" value="13000" /></td>
+                                <td>y</td>
+                                <td><input type="number" id="camera_y" value="2800" /></td>
+                                <td>z</td>
+                                <td><input type="number" id="camera_z" value="600" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2"><input type="button" onclick="onClickLoadBtn()" value="Load New Parameters" /></td>
+                </tr>
+            </table>
+            <canvas id="canvas"></canvas>
         </div>
     </body>
 </html>

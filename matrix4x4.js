@@ -157,7 +157,7 @@ class Matrix4x4 {
         f2 = -far * near / (far - near)
         z = z * f1 + f2
         
-        This equation normalize the Z value to [0-1] range values, it could be written like this:
+        This equation normalize the Z value to [0-1] range values, similar to this but not equal:
         z = (z - near) / (far - near)
         This give us the ratio BUT in order to normalize the value with the help of the 'transform' method
         which transforms the coordinates to perspective coordinates if the W value is different than 1 dividing by it,
