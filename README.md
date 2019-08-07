@@ -23,7 +23,7 @@ This demo only loads the geometry and apply basic shading to polygons, no textur
 
 ## Considerations
 
-This demo was thought to be used with **OBJ** files where the geometry was generated in a left handed coordinated system, if this is not the case the rendering could display glitches.
+This demo was thought to be used with **OBJ** files where the geometry was generated in a left handed coordinate system, if this is not the case the rendering could display glitches.
 
 ## Demo
 
